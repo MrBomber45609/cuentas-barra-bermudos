@@ -44,10 +44,11 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  /* Aumentar letra base enormemente para accesibilidad */
-  font-size: 18px; 
+  font-size: 16px; /* Base ligeramente menor en móvil pero botones grandes */
   min-height: 100vh;
   line-height: 1.5;
+  -webkit-tap-highlight-color: transparent; /* Quitar parpadeo azul en iOS/Android al tocar */
+  overscroll-behavior-y: none; /* Comportamiento nativo de rebote */
 }
 
 /* ===== NAV ===== */
@@ -56,9 +57,9 @@ body {
   top: 0;
   z-index: 100;
   background: var(--bg-card);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04); /* Sombra más difuminada estilo iOS */
 }
 
 .navbar-inner {
@@ -140,15 +141,15 @@ body {
 
 .socio-card {
   background: var(--bg-card);
-  border: 2px solid var(--border);
+  border: 2px solid var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 1.25rem;
   cursor: pointer;
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03); /* Más sutil */
 }
 
 .socio-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-large); }
@@ -201,9 +202,11 @@ body {
   font-weight: 700;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: var(--transition);
+  transition: transform 0.1s ease;
   text-decoration: none;
   touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
@@ -273,17 +276,15 @@ body {
   background: var(--primary-light); border-radius: var(--radius-md); border: 1px solid var(--primary);
 }
 
-/* ===== TOTAL BANNER ===== */
 .total-banner {
   background: var(--bg-card);
-  border: 3px solid var(--primary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06); /* Elevación premium móvil */
 }
 .total-banner-top { display: flex; justify-content: space-between; align-items: center; }
 .total-banner-label { font-size: 1.1rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; }

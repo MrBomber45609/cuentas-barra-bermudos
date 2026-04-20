@@ -4,6 +4,13 @@ import './globals.css';
 export const metadata = {
   title: 'Los Bermudos',
   description: 'Gestión de cuentas de socios para la barra de la caseta',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
+  themeColor: '#ffffff',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Los Bermudos',
+  },
 };
 
 export default function RootLayout({ children }) {
