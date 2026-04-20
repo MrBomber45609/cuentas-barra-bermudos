@@ -13,6 +13,7 @@ export default function SocioPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [flashingProducts, setFlashingProducts] = useState({});
 
   const [selectedProducto, setSelectedProducto] = useState('');
   const [saving, setSaving] = useState(false);
@@ -41,9 +42,20 @@ export default function SocioPage() {
   }, [fetchSocio, fetchProductos]);
 
   const handleAddConsumo = async (producto) => {
-    setSaving(true);
-    // Un pequeño aviso de que se está añadiendo (opcional, pero útil)
-    showToast(`⏳ Añadiendo ${producto.nombre}...`);
+    // Animación inmediata y feedback visual (sin bloquear otros toques)
+    setFlashingProducts(prev => ({...prev, [producto.id]: true}));
+    setTimeout(() => {
+      setFlashingProducts(prev => {
+        const next = {...prev};
+        delete next[producto.id];
+        return next;
+      });
+    }, 400);
+
+    // Opcional: vibración corta si el móvil lo soporta
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
 
     try {
       const res = await fetch('/api/consumos', {
@@ -65,8 +77,8 @@ export default function SocioPage() {
         const err = await res.json();
         showToast('❌ ' + err.error, 'error');
       }
-    } finally {
-      setSaving(false);
+    } catch (error) {
+      showToast('❌ Error de conexión', 'error');
     }
   };
 
@@ -171,13 +183,14 @@ export default function SocioPage() {
               {productos.filter(p => p.categoria === cat).map(p => (
                 <button
                   key={p.id}
-                  className="btn btn-secondary"
-                  disabled={saving}
+                  className={`btn ${flashingProducts[p.id] ? 'flash-success' : 'btn-secondary'}`}
                   onClick={() => handleAddConsumo(p)}
                   style={{ display: 'flex', flexDirection: 'column', height: '100px', padding: '0.5rem', textAlign: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
                 >
                   <span style={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.2 }}>{p.nombre}</span>
-                  <span style={{ fontSize: '1.1rem', color: 'var(--amber)', marginTop: '6px', fontWeight: 800 }}>{parseFloat(p.precio).toFixed(2)} €</span>
+                  <span style={{ fontSize: '1.1rem', color: flashingProducts[p.id] ? '#ffffff' : 'var(--amber)', marginTop: '6px', fontWeight: 800 }}>
+                    {parseFloat(p.precio).toFixed(2)} €
+                  </span>
                 </button>
               ))}
             </div>

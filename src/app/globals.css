@@ -304,6 +304,18 @@ body {
 .consumo-actions { display: grid; grid-template-columns: 1fr 60px; gap: 0.75rem; }
 .consumo-actions .btn { width: 100%; font-size: 1.1rem !important; }
 
+/* ===== ANIMACIONES ===== */
+@keyframes pop-success {
+  0% { transform: scale(1); background-color: var(--bg-primary); }
+  50% { transform: scale(1.05); background-color: var(--green); color: white; border-color: var(--green); box-shadow: 0 0 15px rgba(22, 163, 74, 0.4); }
+  100% { transform: scale(1); background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-strong); box-shadow: none; }
+}
+
+.flash-success {
+  animation: pop-success 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  color: white !important;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (min-width: 768px) {
   .modal { border-radius: var(--radius-xl); max-width: 500px; padding: 2.5rem; align-self: center; }
