@@ -125,21 +125,7 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="stats-row">
-        <div className="stat-card">
-          <div className="stat-label">Total Pendiente</div>
-          <div className="stat-value">{totalGeneral.toFixed(2)} €</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Socios Activos</div>
-          <div className="stat-value neutral">{socios.length}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Con Deuda</div>
-          <div className="stat-value neutral">{sociosConDeuda}</div>
-        </div>
-      </div>
+
 
       {/* Search */}
       {socios.length > 0 && (
