@@ -15,10 +15,6 @@ export default function SocioPage() {
   const [toast, setToast] = useState(null);
 
   const [selectedProducto, setSelectedProducto] = useState('');
-  const [nombreLibre, setNombreLibre] = useState('');
-  const [cantidad, setCantidad] = useState(1);
-  const [precioManual, setPrecioManual] = useState('');
-  const [modoLibre, setModoLibre] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -44,25 +40,10 @@ export default function SocioPage() {
     fetchProductos();
   }, [fetchSocio, fetchProductos]);
 
-  const handleProductoChange = (e) => {
-    const pid = e.target.value;
-    setSelectedProducto(pid);
-    const p = productos.find(p => String(p.id) === pid);
-    if (p) setPrecioManual(p.precio);
-    else setPrecioManual('');
-  };
-
-  const handleAddConsumo = async (e) => {
-    e.preventDefault();
+  const handleAddConsumo = async (producto) => {
     setSaving(true);
-
-    const nombre_producto = modoLibre
-      ? nombreLibre.trim()
-      : (productos.find(p => String(p.id) === selectedProducto)?.nombre || '');
-    const precio = parseFloat(precioManual);
-
-    if (!nombre_producto) { showToast('❌ Selecciona o escribe un producto', 'error'); setSaving(false); return; }
-    if (isNaN(precio) || precio < 0) { showToast('❌ Precio inválido', 'error'); setSaving(false); return; }
+    // Un pequeño aviso de que se está añadiendo (opcional, pero útil)
+    showToast(`⏳ Añadiendo ${producto.nombre}...`);
 
     try {
       const res = await fetch('/api/consumos', {
@@ -70,19 +51,15 @@ export default function SocioPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           socio_id: id,
-          producto_id: modoLibre ? null : (selectedProducto || null),
-          nombre_producto,
-          cantidad: parseInt(cantidad),
-          precio_unitario: precio,
+          producto_id: producto.id,
+          nombre_producto: producto.nombre,
+          cantidad: 1, // Siempre 1 por toque para camareros
+          precio_unitario: parseFloat(producto.precio),
         }),
       });
 
       if (res.ok) {
-        showToast('✅ Añadido a la cuenta');
-        setSelectedProducto('');
-        setNombreLibre('');
-        setCantidad(1);
-        setPrecioManual('');
+        showToast(`✅ ${producto.nombre} añadido`);
         fetchSocio();
       } else {
         const err = await res.json();
@@ -136,9 +113,6 @@ export default function SocioPage() {
   if (!socio) return null;
 
   const total = parseFloat(socio.total || 0);
-  const subtotalEstimado = precioManual && cantidad
-    ? (parseFloat(precioManual || 0) * parseInt(cantidad || 1)).toFixed(2)
-    : null;
 
   return (
     <div className="animate-in">
@@ -184,110 +158,31 @@ export default function SocioPage() {
         )}
       </div>
 
-      {/* Formulario */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <PlusCircle size={24} className="brand-accent" /> Apuntar Consumo
+      {/* Botonera Rápida TPV */}
+      <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
+        <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <PlusCircle size={24} className="brand-accent" /> TPV Rapido (Tocar para añadir 1 de..)
         </div>
 
-        {/* Toggle */}
-        <div className="toggle-pills" style={{ marginBottom: '1rem' }}>
-          <button
-            type="button"
-            className={`toggle-pill ${!modoLibre ? 'active' : ''}`}
-            onClick={() => { setModoLibre(false); setNombreLibre(''); }}
-            style={{ display: 'flex', alignItems:'center', justifyContent: 'center', gap:'8px' }}
-          >
-            <List size={20} /> Del menú
-          </button>
-          <button
-            type="button"
-            className={`toggle-pill ${modoLibre ? 'active' : ''}`}
-            onClick={() => { setModoLibre(true); setSelectedProducto(''); setPrecioManual(''); }}
-            style={{ display: 'flex', alignItems:'center', justifyContent: 'center', gap:'8px' }}
-          >
-            <PenLine size={20} /> Libre
-          </button>
-        </div>
-
-        <form onSubmit={handleAddConsumo}>
-          {/* Producto */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label className="form-label">Producto</label>
-            {modoLibre ? (
-              <input
-                className="form-input"
-                type="text"
-                placeholder="Nombre del producto..."
-                value={nombreLibre}
-                onChange={e => setNombreLibre(e.target.value)}
-                required
-              />
-            ) : (
-              <select
-                className="form-select"
-                value={selectedProducto}
-                onChange={handleProductoChange}
-                required
-              >
-                <option value="">Selecciona un producto...</option>
-                {categorias.map(cat => (
-                  <optgroup key={cat} label={cat}>
-                    {productos
-                      .filter(p => p.categoria === cat)
-                      .map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.nombre} — {parseFloat(p.precio).toFixed(2)} €
-                        </option>
-                      ))}
-                  </optgroup>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Cantidad + Precio */}
-          <div className="form-grid-2" style={{ marginBottom: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Cantidad</label>
-              <input
-                className="form-input"
-                type="number"
-                min="1"
-                inputMode="numeric"
-                value={cantidad}
-                onChange={e => setCantidad(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Precio (€)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={precioManual}
-                onChange={e => setPrecioManual(e.target.value)}
-                required
-              />
+        {categorias.map(cat => (
+          <div key={cat} style={{ marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase', borderBottom: '2px solid var(--border)', paddingBottom: '0.25rem' }}>{cat}</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.5rem' }}>
+              {productos.filter(p => p.categoria === cat).map(p => (
+                <button
+                  key={p.id}
+                  className="btn btn-secondary"
+                  disabled={saving}
+                  onClick={() => handleAddConsumo(p)}
+                  style={{ display: 'flex', flexDirection: 'column', height: '100px', padding: '0.5rem', textAlign: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+                >
+                  <span style={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.2 }}>{p.nombre}</span>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--amber)', marginTop: '6px', fontWeight: 800 }}>{parseFloat(p.precio).toFixed(2)} €</span>
+                </button>
+              ))}
             </div>
           </div>
-
-          {/* Acción */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <button type="submit" className="btn btn-primary btn-lg" disabled={saving} style={{ flex: 1 }}>
-              {saving ? 'Guardando...' : <><PlusCircle size={20} /> Añadir a la Cuenta</>}
-            </button>
-            {subtotalEstimado && (
-              <span style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
-                = <strong style={{ color: 'var(--amber)' }}>{subtotalEstimado} €</strong>
-              </span>
-            )}
-          </div>
-        </form>
+        ))}
       </div>
 
       {/* Lista consumos */}
