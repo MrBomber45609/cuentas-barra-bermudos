@@ -71,7 +71,7 @@ export default function SocioPage() {
       });
 
       if (res.ok) {
-        showToast(`✅ ${producto.nombre} añadido`);
+        showToast(`✅ Añadido correctamente: ${producto.nombre}`);
         fetchSocio();
       } else {
         const err = await res.json();
